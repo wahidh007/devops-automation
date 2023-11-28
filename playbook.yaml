@@ -58,3 +58,13 @@
       copy:
         src: "/vagrant_data/main.tf"
         dest: "{{ lookup('env', 'HOME') }}/terraform/main.tf"
+    # Execute terraform init
+    - name: This command will change the working directory to somedir/
+      ansible.builtin.shell:
+        cmd: terraform init
+        chdir: "{{ lookup('env', 'HOME') }}/terraform/"
+    # Execute terraform apply
+    - name: This command will change the working directory to somedir/
+      ansible.builtin.shell:
+        cmd: terraform apply
+        chdir: "{{ lookup('env', 'HOME') }}/terraform/"                
