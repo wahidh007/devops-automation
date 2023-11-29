@@ -1,13 +1,13 @@
 ---
 - name: Setup Terraform on New Ubuntu 22.04 System
-  hosts: localhost
+  hosts: all
   gather_facts: true
   tasks:
     - name: Update the APT Package Cache
       become: true
       apt:
         update_cache: true
-        cache_valid_time: 3600
+        #cache_valid_time: 3600
     - name: Before we add the Hashicorp Repo - we add the signing key
       become: true
       apt_key:
@@ -20,30 +20,34 @@
         state: present
     - name: Install software from standard repos and hashicorp
       become: true
-      package:
+      apt:
         name:
           - docker.io
           - gnupg
           - software-properties-common
           - curl
           - terraform
+    # - name: add userpermissions
+    #   shell: "usermod -aG docker vagrant"          
     - name: We add the local USER to the Docker group
       become: true
       user:
-        name: "{{ lookup('env', 'USER') }}"
+        #name: "{{ lookup('env', 'USER') }}"
+        name: vagrant
         groups: docker
         append: true
     - name: We create the directory for terraform project
       file:
-        path: "{{ lookup('env', 'HOME') }}/terraform/"
+        # path: "{{ lookup('env', 'HOME') }}/terraform/"
+        path: "/home/vagrant/terraform/"
         state: directory
     - name: We create the web directory to store content
       file:
-        path: "{{ lookup('env', 'HOME') }}/terraform/web"
+        path: "/home/vagrant/terraform/web"
         state: directory
     - name: Create the index page for the website
       copy:
-        dest: "{{ lookup('env', 'HOME') }}/terraform/web/index.html"
+        dest: "/home/vagrant/terraform/web/index.html"
         content: This is my web page
     # - name: We clone the course git repository
     #   git:
@@ -54,17 +58,19 @@
     #   copy:
     #     src: "{{ lookup('env', 'HOME') }}/devops-automation/terraform/main.tf"
     #     dest: "{{ lookup('env', 'HOME') }}/terraform/main.tf"      
-    - name: We copy the main.tf terraform file from the shared folder /vagrant_data
+    - name: We copy the main.tf terraform file to the VM
       copy:
-        src: "/vagrant_data/main.tf"
-        dest: "{{ lookup('env', 'HOME') }}/terraform/main.tf"
+        src: "main.tf"
+        dest: "/home/vagrant/terraform/main.tf"
     # Execute terraform init
-    - name: This command will change the working directory to somedir/
+    - name: This command will change the working directory to terraform dir/
+      #become: true
       ansible.builtin.shell:
         cmd: terraform init
-        chdir: "{{ lookup('env', 'HOME') }}/terraform/"
+        chdir: "/home/vagrant/terraform/"
     # Execute terraform apply
-    - name: This command will change the working directory to somedir/
+    - name: This command will change the working directory to terraform dir/
+      #become: true
       ansible.builtin.shell:
         cmd: terraform apply
-        chdir: "{{ lookup('env', 'HOME') }}/terraform/"                
+        chdir: "/home/vagrant/terraform/"                
